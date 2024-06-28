@@ -9,7 +9,7 @@
 		<relativePath/>
 	</parent>
 	<groupId>com.sunhy</groupId>
-	<artifactId>be</artifactId>
+	<artifactId>HealthCheckUpBE</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>be</name>
 	<description>be</description>
