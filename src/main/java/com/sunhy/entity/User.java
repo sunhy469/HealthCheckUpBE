@@ -26,6 +26,12 @@ public class User implements Serializable {
 
     private String sex;
 
+    // 权限id
+    // 0--- 普通用户
+    // 1---  医生
+    // 2---  管理员
+    private Long roleId;
+
     @TableField(fill = FieldFill.INSERT)//插入时自动填充
     private LocalDateTime createTime;
 

@@ -7,17 +7,16 @@ import com.sunhy.common.R;
 import com.sunhy.dto.UserDto;
 import com.sunhy.entity.Test;
 import com.sunhy.entity.User;
-import com.sunhy.entity.UserDetail;
-import com.sunhy.service.IUserDetailService;
 import com.sunhy.service.IUserService;
 import com.sunhy.utils.JavaWebToken;
 import com.sunhy.utils.ValidateCodeUtils;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -28,12 +27,10 @@ public class HomeController {
 
     private final IUserService userService;
 
-    private final IUserDetailService userDetailService;
 
     private final RedisTemplate<String, String> redisTemplate;
-    public HomeController(IUserService userService, IUserDetailService userDetailService, RedisTemplate<String, String> redisTemplate) {
+    public HomeController(IUserService userService, RedisTemplate<String, String> redisTemplate) {
         this.userService = userService;
-        this.userDetailService = userDetailService;
         this.redisTemplate = redisTemplate;
     }
 
@@ -42,6 +39,41 @@ public class HomeController {
 
         log.info("id是"+test.getId());
         return "载入成功";
+    }
+
+    //用户注册
+    @PostMapping("/register")
+    @Transactional
+    public R<String> register(@RequestBody UserDto userDto) {
+        log.info("用户注册");
+        //手机号
+        String mobile = userDto.getMobile();
+        //注册验证码
+        String captcha = userDto.getCaptcha();
+        assert mobile != null;
+        String correctCaptcha = redisTemplate.opsForValue().get(mobile);
+        assert correctCaptcha != null;
+
+        if (!correctCaptcha.equals(captcha))
+            return R.error("验证码错误，请检查后重试");
+
+        //对密码MD5加密
+        userDto.setPassword(DigestUtils.md5DigestAsHex(userDto.getPassword().getBytes()));
+        long l = System.currentTimeMillis();
+        userDto.setUserid("sunny_" + l);
+        //注册数据
+        userService.save(userDto);
+        //删除注册时的验证码
+        redisTemplate.delete(mobile);
+        User user = userService.getOne(new LambdaQueryWrapper<User>().eq(User::getMobile, mobile));
+        String token = handleToken(user);
+
+        String userid ="sunny_" + l;
+
+        BaseContext.setUserid(userid);
+
+        return R.success("注册成功", token, user.getId().toString(),"");
+
     }
 
     //用户登录
@@ -68,14 +100,10 @@ public class HomeController {
             String token = handleToken(one);
 
             String userid = one.getUserid();
-            LambdaQueryWrapper<UserDetail> wrapper = new LambdaQueryWrapper<>();
-            wrapper.eq(UserDetail::getUserid, userid);
-            UserDetail userDetail = userDetailService.getOne(wrapper);
-            String avatar = userDetail.getAvatar();
 
             BaseContext.setUserid(userid);
 
-            return R.success("登录成功", token, one.getId().toString(),avatar);
+            return R.success("登录成功", token, one.getId().toString(),"");
         }
 
         //账号登录
@@ -97,14 +125,10 @@ public class HomeController {
         String token = handleToken(theUser);
 
         String userid = theUser.getUserid();
-        LambdaQueryWrapper<UserDetail> wrapper2 = new LambdaQueryWrapper<>();
-        wrapper2.eq(UserDetail::getUserid, userid);
-        UserDetail userDetail = userDetailService.getOne(wrapper2);
-        String avatar = userDetail.getAvatar();
 
         BaseContext.setUserid(userid);
 
-        return R.success("登录成功", token, theUser.getId().toString(),avatar);//把token返回给前端
+        return R.success("登录成功", token, theUser.getId().toString(),"");//把token返回给前端
     }
 
     //获取验证码
