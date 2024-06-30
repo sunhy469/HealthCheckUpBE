@@ -25,14 +25,6 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class HomeController {
 
-    private final IUserService userService;
-
-
-    private final RedisTemplate<String, String> redisTemplate;
-    public HomeController(IUserService userService, RedisTemplate<String, String> redisTemplate) {
-        this.userService = userService;
-        this.redisTemplate = redisTemplate;
-    }
 
     @PostMapping()
     public String home(@RequestBody Test test){
