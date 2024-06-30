@@ -122,7 +122,7 @@ public class UserController {
 
         BaseContext.setUserid(userid);
 
-        return R.success("登录成功", token, theUser.getId().toString(),"");//把token返回给前端
+        return R.success("登录成功", token, theUser.getId().toString(),theUser.getRoleId().toString());//把token返回给前端
     }
 
     //获取验证码

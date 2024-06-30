@@ -17,16 +17,16 @@ public class R<T> {
 
     private String id;
 
-    private String avatar;
+    private String roleId;
 
 
-    public static <T> R<T> success(T object,String token,String id,String avatar) {
+    public static <T> R<T> success(T object,String token,String id,String roleId) {
         R<T> r = new R<T>();
         r.data = object;
         r.code = 1;
         r.token= token;
         r.id=id;
-        r.avatar=avatar;
+        r.roleId=roleId;
         return r;
     }
     public static <T> R<T> success(T object) {
