@@ -35,10 +35,19 @@ public class UserController {
         this.redisTemplate = redisTemplate;
     }
 
+    @PostMapping("/getinfo")
+    public R<User> getInfo(@RequestBody User user) {
+        log.info("获取用户的基本信息");
+        User one = userService.getById(user.getId());
+        if (one !=null)
+            return R.success(one);
+        else return R.error("用户不存在!");
+    }
+
     //用户注册
     @PostMapping("/register")
     @Transactional
-    public R<String> register(@RequestBody UserDto userDto) {
+    public R<User> register(@RequestBody UserDto userDto) {
         log.info("用户注册");
         //手机号
         String mobile = userDto.getMobile();
@@ -66,13 +75,12 @@ public class UserController {
 
         BaseContext.setUserid(userid);
 
-        return R.success("注册成功", token, user.getId().toString(),"");
-
+        return R.success(user,"注册成功",token);
     }
 
     //用户登录
     @PostMapping("/login")
-    public R<String> login(@RequestBody UserDto userDto) {
+    public R<User> login(@RequestBody UserDto userDto) {
         log.info("用户登录");
 
         //手机号登录
@@ -97,7 +105,7 @@ public class UserController {
 
             BaseContext.setUserid(userid);
 
-            return R.success("登录成功", token, one.getId().toString(),"");
+            return R.success(one,"登录成功",token);
         }
 
         //账号登录
@@ -122,7 +130,7 @@ public class UserController {
 
         BaseContext.setUserid(userid);
 
-        return R.success("登录成功", token, theUser.getId().toString(),theUser.getRoleId().toString());//把token返回给前端
+        return R.success(theUser,"登录成功",token);//把token返回给前端
     }
 
     //获取验证码

@@ -15,20 +15,15 @@ public class R<T> {
 
     private String token; //token
 
-    private String id;
-
-    private String roleId;
-
-
-    public static <T> R<T> success(T object,String token,String id,String roleId) {
+    public static <T> R<T> success(T object,String message,String token) {
         R<T> r = new R<T>();
         r.data = object;
+        r.message = message;
         r.code = 1;
         r.token= token;
-        r.id=id;
-        r.roleId=roleId;
         return r;
     }
+
     public static <T> R<T> success(T object) {
         R<T> r = new R<T>();
         r.data = object;
