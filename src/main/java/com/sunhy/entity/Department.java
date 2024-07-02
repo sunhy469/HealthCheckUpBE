@@ -15,5 +15,9 @@ public class Department implements Serializable {
 
     private Long deptId;
 
-    private String deptName;
+    private String hospitalName;
+
+    private String  officeName;
+
+    private String setMeal;
 }

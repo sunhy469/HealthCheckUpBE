@@ -1,7 +1,7 @@
 package com.sunhy.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.sunhy.entity.Report;
+import com.sunhy.entity.Order;
 
-public interface IReportService extends IService<Report> {
+public interface IOrderService extends IService<Order> {
 }

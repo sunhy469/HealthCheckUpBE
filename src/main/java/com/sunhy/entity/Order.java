@@ -9,7 +9,7 @@ import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Data
-public class Report implements Serializable {
+public class Order implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -18,11 +18,7 @@ public class Report implements Serializable {
 
     private Long userId;
 
-    private String institution;
-
-    private String setMeal;
-
-    private String type;
+    private Long doctorId;
 
     @TableField(fill = FieldFill.INSERT)//插入时自动填充
     private LocalDateTime createTime;

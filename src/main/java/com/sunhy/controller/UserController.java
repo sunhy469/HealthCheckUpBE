@@ -13,12 +13,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -43,6 +42,30 @@ public class UserController {
             return R.success(one);
         else return R.error("用户不存在!");
     }
+
+    /*
+    查询所有患者信息
+     */
+    @GetMapping("/getpatient")
+    public R<List<User>> getPatient() {
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getRoleId, 0);
+        List<User> patients = userService.getPatient(wrapper);
+        return R.success(patients);
+    }
+
+
+    /*
+    修改用户基本信息
+     */
+    @PostMapping("/editinfo")
+    public R<User> editInfo(@RequestBody User user) {
+        log.info("修改用户的基本信息");
+        userService.updateById(user);
+        return R.success(user,"修改成功");
+    }
+
+
 
     //用户注册
     @PostMapping("/register")

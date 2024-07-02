@@ -31,6 +31,14 @@ public class R<T> {
         return r;
     }
 
+    public static <T> R<T> success(T object,String message) {
+        R<T> r = new R<T>();
+        r.data = object;
+        r.message = message;
+        r.code = 1;
+        return r;
+    }
+
     public static <T> R<T> success(String message) {
         R<T> r = new R<T>();
         r.message = message;

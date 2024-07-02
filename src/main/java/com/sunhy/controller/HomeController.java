@@ -1,6 +1,6 @@
 package com.sunhy.controller;
 
-import com.sunhy.service.IReportService;
+import com.sunhy.service.IOrderService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
@@ -9,11 +9,12 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 public class HomeController {
 
-    private IReportService reportService;
+    private IOrderService orderService;
 
-    public HomeController(IReportService reportService) {
-        this.reportService = reportService;
+    public HomeController(IOrderService orderService) {
+        this.orderService = orderService;
     }
+
 
 
 }
