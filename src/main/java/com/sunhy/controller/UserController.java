@@ -90,6 +90,8 @@ public class UserController {
     @PostMapping("/editinfo")
     public R<User> editInfo(@RequestBody User user) {
         log.info("修改用户的基本信息");
+        if (user.getPassword() != null)
+            user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
         userService.updateById(user);
         return R.success(user,"修改成功");
     }

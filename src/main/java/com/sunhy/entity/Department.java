@@ -13,7 +13,7 @@ public class Department implements Serializable {
 
     private Long id;
 
-    private Long conbo;
+    private String combo;
 
     private String deptName;
 

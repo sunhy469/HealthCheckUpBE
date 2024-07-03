@@ -13,5 +13,5 @@ public class Doctor implements Serializable {
 
     private Long id;
 
-    private String comba;
+    private String combo;
 }
