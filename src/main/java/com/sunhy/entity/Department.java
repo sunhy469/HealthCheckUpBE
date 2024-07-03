@@ -13,11 +13,9 @@ public class Department implements Serializable {
 
     private Long id;
 
-    private Long deptId;
+    private Long conbo;
 
-    private String hospitalName;
+    private String deptName;
 
-    private String  officeName;
-
-    private String setMeal;
+    private String  hospitalName;
 }

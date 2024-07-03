@@ -15,6 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -31,6 +33,26 @@ public class UserController {
     public UserController(IUserService userService, RedisTemplate<String, String> redisTemplate) {
         this.userService = userService;
         this.redisTemplate = redisTemplate;
+    }
+
+    @PostMapping("/modpwd")
+    public R<String> modPwd(@RequestBody UserDto userDto) {
+        log.info("修改密码");
+        //注册验证码
+        String captcha = userDto.getCaptcha();
+        String mobile = userDto.getMobile();
+        assert mobile != null;
+        String correctCaptcha = redisTemplate.opsForValue().get(mobile);
+        assert correctCaptcha != null;
+
+        if (!correctCaptcha.equals(captcha))
+            return R.error("验证码错误，请检查后重试");
+
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getMobile, mobile);
+        userDto.setPassword(DigestUtils.md5DigestAsHex(userDto.getPassword().getBytes()));
+        userService.update(userDto,wrapper);
+        return R.success("修改密码成功");
     }
 
     @PostMapping("/getinfo")
@@ -71,8 +93,6 @@ public class UserController {
         userService.updateById(user);
         return R.success(user,"修改成功");
     }
-
-
 
     //用户注册
     @PostMapping("/register")
@@ -122,6 +142,10 @@ public class UserController {
             if (one == null)
                 return R.error("手机号未注册，请注册后重试^_^");
 
+            // 修改上次登录时间
+            one.setLastLoginTime(LocalDateTime.now());
+            userService.updateById(one);
+
             //验证码校验
             String correctCaptcha = redisTemplate.opsForValue().get(mobile);
             if (StringUtils.isEmpty(correctCaptcha) || !correctCaptcha.equals(captcha))
@@ -152,6 +176,10 @@ public class UserController {
 
         if (!theUser.getPassword().equals(password))
             return R.error("密码错误，请检查后重试");
+
+        // 修改上次登录时间
+        theUser.setLastLoginTime(LocalDateTime.now());
+        userService.updateById(theUser);
 
         //生成token
         String token = handleToken(theUser);

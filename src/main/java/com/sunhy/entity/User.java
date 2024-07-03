@@ -37,4 +37,5 @@ public class User implements Serializable {
     @TableField(fill = FieldFill.INSERT)//插入时自动填充
     private LocalDateTime createTime;
 
+    private LocalDateTime lastLoginTime;
 }
