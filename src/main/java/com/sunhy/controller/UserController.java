@@ -15,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -54,6 +53,14 @@ public class UserController {
         return R.success(patients);
     }
 
+    /*
+    查询所有用户信息
+     */
+    @GetMapping("/getall")
+    public R<List<User>> getAll() {
+        log.info("获取所有用户信息");
+        return R.success(userService.list());
+    }
 
     /*
     修改用户基本信息
