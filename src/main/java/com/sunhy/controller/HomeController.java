@@ -41,6 +41,19 @@ public class HomeController {
         this.userService = userService;
     }
 
+    @PostMapping("/finishrecord")
+    public R<String> finishRecord(@RequestBody Orders order) {
+        log.info("结束预约");
+        Orders one = orderService.getById(order);
+        if (one == null){
+            return R.error("订单错误");
+        }else {
+            one.setIsFinished(one.getIsFinished()+1);
+            orderService.updateById(one);
+            return R.success("完成订单");
+        }
+    }
+
     @PostMapping("/apply")
     public R<String> apply(@RequestBody Orders order) {
         log.info("预约");
@@ -74,6 +87,7 @@ public class HomeController {
             recordDto.setDoctorId(order.getDoctorId());
             recordDto.setDoctorName(order.getDoctorName());
             recordDto.setAppointmentTime(order.getAppointmentTime());
+            recordDto.setIsFinished(order.getIsFinished());
 
             User patient = userService.getById(order.getUserId());
             recordDto.setName(patient.getName());

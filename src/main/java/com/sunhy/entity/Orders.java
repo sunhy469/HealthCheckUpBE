@@ -20,6 +20,8 @@ public class Orders implements Serializable {
 
     private String doctorName;
 
+    private Integer isFinished;
+
     private LocalDateTime appointmentTime;
 
 }
