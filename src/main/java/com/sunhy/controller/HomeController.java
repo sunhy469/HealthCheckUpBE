@@ -13,8 +13,9 @@ import com.sunhy.service.IDoctorService;
 import com.sunhy.service.IOrdersService;
 import com.sunhy.service.IUserService;
 import lombok.extern.slf4j.Slf4j;
-import net.sf.jsqlparser.util.deparser.LimitDeparser;
-import org.springframework.beans.factory.annotation.Autowired;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -57,13 +58,19 @@ public class HomeController {
     @PostMapping("/apply")
     public R<String> apply(@RequestBody Orders order) {
         log.info("预约");
+        String doctorName = order.getDoctorName();
+        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(User::getName,doctorName);
+        User user = userService.getOne(wrapper);
+        order.setDoctorId(user.getId());
+        order.setIsFinished(0);
         orderService.save(order);
         return R.success("预约成功");
     }
 
-    @PostMapping("/recordtoday")
-        public R<List<RecordDto>> recordToday(@RequestBody User user) {
-        log.info("记录今日");
+    @PostMapping("/recordall")
+        public R<List<RecordDto>> recordAll(@RequestBody User user) {
+        log.info("记录所有");
         Long roleId = user.getRoleId();
         Long id = user.getId(); // 医生或者管理员
 
@@ -71,10 +78,73 @@ public class HomeController {
         if (roleId ==2 && id != null){
             // 管理员
             orders = orderService.list();
-        }else {
+        }else if (roleId ==1 && id != null){
             // 医生
             LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
             wrapper.eq(Orders::getDoctorId,id);
+            orders = orderService.list(wrapper);
+        }else {
+            LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Orders::getUserId,id);
+            orders = orderService.list(wrapper);
+        }
+
+        ArrayList<RecordDto> records = new ArrayList<>();
+        for (Orders order : orders) {
+            RecordDto recordDto = new RecordDto();
+
+            recordDto.setId(order.getId()); // 订单Id
+            recordDto.setUserId(order.getUserId());
+            recordDto.setDoctorId(order.getDoctorId());
+            recordDto.setDoctorName(order.getDoctorName());
+            recordDto.setAppointmentTime(order.getAppointmentTime());
+            recordDto.setIsFinished(order.getIsFinished());
+
+            User patient = userService.getById(order.getUserId());
+            recordDto.setName(patient.getName());
+
+            Doctor doctorInfo = doctorService.getById(order.getDoctorId());
+            recordDto.setCombo(doctorInfo.getCombo());
+
+            LambdaQueryWrapper<Department> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Department::getCombo,doctorInfo.getCombo());
+            Department department = departmentService.getOne(wrapper);
+
+            recordDto.setDeptName(department.getDeptName());
+            recordDto.setHospitalName(department.getHospitalName());
+            records.add(recordDto);
+        }
+
+        return R.success(records);
+    }
+
+    @PostMapping("/recordtoday")
+    public R<List<RecordDto>> recordToday(@RequestBody User user) {
+        log.info("记录今日");
+        Long roleId = user.getRoleId();
+        Long id = user.getId(); // 医生或者管理员
+
+        LocalDate today = LocalDate.now();
+        LocalDateTime startOfDay = today.atStartOfDay();
+        LocalDateTime endOfDay = today.atTime(LocalTime.MAX);
+
+
+        List<Orders> orders = null;
+        if (roleId ==2 && id != null){
+            // 管理员
+            LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+            wrapper.between(Orders::getAppointmentTime, startOfDay, endOfDay);
+            orders = orderService.list(wrapper);
+        }else if (roleId ==1 && id != null){
+            // 医生
+            LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Orders::getDoctorId,id);
+            wrapper.between(Orders::getAppointmentTime, startOfDay, endOfDay);
+            orders = orderService.list(wrapper);
+        }else {
+            LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+            wrapper.eq(Orders::getUserId,id);
+            wrapper.between(Orders::getAppointmentTime, startOfDay, endOfDay);
             orders = orderService.list(wrapper);
         }
 

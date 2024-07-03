@@ -55,6 +55,14 @@ public class UserController {
         return R.success("修改密码成功");
     }
 
+    @PostMapping("/delete")
+    public R<String> delete(@RequestBody User user) {
+        log.info("删除用户");
+        userService.removeById(user.getId());
+        return R.success("删除成功");
+    }
+
+
     @PostMapping("/getinfo")
     public R<User> getInfo(@RequestBody User user) {
         log.info("获取用户的基本信息");
