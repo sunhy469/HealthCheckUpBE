@@ -238,7 +238,7 @@ public class UserController {
         map.put("userId", user.getId());
         String token = JavaWebToken.createJavaWebToken(map);
         //3天过期或者用户退出登录过期
-        redisTemplate.opsForValue().set(user.getId().toString(), token, 3, TimeUnit.DAYS);
+//        redisTemplate.opsForValue().set(user.getId().toString(), token, 3, TimeUnit.DAYS);
         return token;
     }
 }
