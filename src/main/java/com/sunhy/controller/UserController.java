@@ -5,7 +5,9 @@ import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.sunhy.common.BaseContext;
 import com.sunhy.common.R;
 import com.sunhy.dto.UserDto;
+import com.sunhy.entity.Orders;
 import com.sunhy.entity.User;
+import com.sunhy.service.IOrdersService;
 import com.sunhy.service.IUserService;
 import com.sunhy.utils.JavaWebToken;
 import com.sunhy.utils.ValidateCodeUtils;
@@ -16,6 +18,7 @@ import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -28,10 +31,13 @@ public class UserController {
 
     private final IUserService userService;
 
+    private final IOrdersService ordersService;
+
     private final RedisTemplate<String, String> redisTemplate;
 
-    public UserController(IUserService userService, RedisTemplate<String, String> redisTemplate) {
+    public UserController(IUserService userService, IOrdersService ordersService, RedisTemplate<String, String> redisTemplate) {
         this.userService = userService;
+        this.ordersService = ordersService;
         this.redisTemplate = redisTemplate;
     }
 
@@ -76,10 +82,15 @@ public class UserController {
     查询所有患者信息
      */
     @GetMapping("/getpatient")
-    public R<List<User>> getPatient() {
-        LambdaQueryWrapper<User> wrapper = new LambdaQueryWrapper<>();
-        wrapper.eq(User::getRoleId, 0);
-        List<User> patients = userService.getPatient(wrapper);
+    public R<List<User>> getPatient(@RequestParam Long id) {
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Orders::getDoctorId,id);
+        List<Orders> orders = ordersService.list(wrapper);
+        ArrayList<User> patients = new ArrayList<>();
+        for (Orders order : orders) {
+            User user = userService.getById(order.getUserId());
+            patients.add(user);
+        }
         return R.success(patients);
     }
 
