@@ -65,6 +65,9 @@ public class UserController {
     public R<String> delete(@RequestBody User user) {
         log.info("删除用户");
         userService.removeById(user.getId());
+        LambdaQueryWrapper<Orders> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(Orders::getUserId, user.getId());
+        ordersService.remove(wrapper);
         return R.success("删除成功");
     }
 
